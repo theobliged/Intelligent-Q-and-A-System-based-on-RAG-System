@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocuQuery - Intelligent Document Q&A</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>DocuQuery</h1>
+            <p>Upload your documents and ask questions about their content. Powered by Retrieval-Augmented Generation (RAG) technology.</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="upload-section">
+                <h2 class="section-title">Upload Documents</h2>
+                
+                <div class="upload-area" id="dropZone">
+                    <div class="upload-icon">
+                        <i class="fas fa-file-upload"></i>
+                    </div>
+                    <div class="upload-text">
+                        <h3>Drag & Drop Files Here</h3>
+                        <p>Supported formats: PDF, TXT, DOCX, Markdown, HTML</p>
+                    </div>
+                    <input type="file" id="fileInput" style="display: none;" accept=".pdf,.txt,.docx,.md,.html" multiple>
+                    <button class="btn btn-upload" onclick="document.getElementById('fileInput').click()">Select Files</button>
+                </div>
+                
+                <div class="document-list">
+                    <h3>Uploaded Documents</h3>
+                    <div id="documentsList">
+                        <!-- Documents will be listed here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="qa-section">
+                <h2 class="section-title">Ask a Question</h2>
+                
+                <textarea class="question-input" placeholder="Type your question here..." id="questionInput"></textarea>
+                
+                <button class="btn" id="askButton">Get Answer</button>
+                
+                <div class="processing-indicator" id="processingIndicator" style="display: none;">
+                    <div class="spinner"></div>
+                    <span>Processing your question...</span>
+                </div>
+                
+                <div class="answer-container">
+                    <div class="answer-placeholder" id="answerPlaceholder">
+                        <i class="fas fa-comment-alt" style="font-size: 2.5rem; margin-bottom: 15px;"></i>
+                        <p>Your answer will appear here after you ask a question.</p>
+                    </div>
+                    
+                    <div class="answer-content" id="answerContent" style="display: none;">
+                        <p id="answerText"></p>
+                        
+                        <div class="answer-references">
+                            <h4>References:</h4>
+                            <div id="referencesList"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>DocuQuery - Intelligent Document Q&A System | Powered by RAG Technology</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/documentProcessor.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/vectorStore.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/rag.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
