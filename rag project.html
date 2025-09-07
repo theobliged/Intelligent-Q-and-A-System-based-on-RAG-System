@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocuQuery - Intelligent Document Q&A</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ===== GLOBAL STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* ===== HEADER STYLES ===== */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* ===== MAIN CONTENT STYLES ===== */
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        
+        .upload-section, .qa-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        /* ===== UPLOAD AREA STYLES ===== */
+        .upload-area {
+            border: 2px dashed #3498db;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            background-color: #e1f0fa;
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            margin-bottom: 15px;
+        }
+        
+        .upload-text h3 {
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        
+        .upload-text p {
+            color: #7f8c8d;
+        }
+        
+        /* ===== BUTTON STYLES ===== */
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-upload {
+            display: inline-block;
+            margin-top: 10px;
+        }
+        
+        /* ===== DOCUMENT LIST STYLES ===== */
+        .document-list {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .document-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 6px;
+            background-color: #f8f9fa;
+            margin-bottom: 10px;
+        }
+        
+        .document-icon {
+            color: #7f8c8d;
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .document-name {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+        
+        .document-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+        
+        .action-btn:hover {
+            color: #3498db;
+        }
+        
+        /* ===== QUESTION INPUT STYLES ===== */
+        .question-input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .question-input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        /* ===== ANSWER CONTAINER STYLES ===== */
+        .answer-container {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            min-height: 200px;
+        }
+        
+        .answer-placeholder {
+            color: #7f8c8d;
+            text-align: center;
+            padding: 40px 0;
+        }
+        
+        .answer-content {
+            line-height: 1.6;
+        }
+        
+        .answer-references {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+        
+        .reference-item {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .reference-item i {
+            margin-right: 8px;
+        }
+        
+        /* ===== PROCESSING INDICATOR STYLES ===== */
+        .processing-indicator {
+            display: flex;
+            align-items: center;
+            color: #3498db;
+            margin-top: 10px;
+        }
+        
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(52, 152, 219, 0.3);
+            border-radius: 50%;
+            border-top-color: #3498db;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* ===== FOOTER STYLES ===== */
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #7f8c8d;
+            padding: 20px;
+        }
+        
+        /* ===== NOTIFICATION STYLES ===== */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            background-color: #2ecc71;
+            color: white;
+            box-shadow: 0 4px极简风格12px rgba(0, 0, 0, 0.1);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.error {
+            background-color: #e74c3c;
+        }
+
+        .mode-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            background-color: #3498db;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: white;
+        }
+        
+        /* ===== RESPONSIVE STYLES ===== */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            header p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ==================== HTML STRUCTURE ==================== -->
+    <div class="container">
+        <header>
+            <h1>DocuQuery</h1>
+            <p>Upload your documents and ask questions about their content. Powered by Retrieval-Augmented Generation (RAG) technology.</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="upload-section">
+                <h2 class="section-title">Upload Documents</h2>
+                
+                <div class="upload-area" id="dropZone">
+                    <div class="upload-icon">
+                        <i class="fas fa-file-upload"></i>
+                    </div>
+                    <div class="upload-text">
+                        <h3>Drag & Drop Files Here</h3>
+                        <p>Supported formats: PDF, TXT</p>
+                    </div>
+                    <input type="file" id="fileInput" style="display: none;" accept=".pdf,.txt" multiple>
+                    <button class="btn btn-upload" onclick="document.getElementById('fileInput').click()">Select Files</button>
+                </div>
+                
+                <div class="document-list">
+                    <h3>Uploaded Documents</h3>
+                    <div id="documentsList">
+                        <!-- Documents will be listed here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="qa-section">
+                <h2 class="section-title">Ask a Question</h2>
+                
+                <textarea class="question-input" placeholder="Type your question here..." id="questionInput"></textarea>
+                
+                <button class="btn" id="askButton">Get Answer</button>
+                
+                <div class="processing-indicator" id="processingIndicator" style="display: none;">
+                    <div class="spinner"></div>
+                    <span>Processing your question...</span>
+                </div>
+                
+                <div class="answer-container">
+                    <div class="answer-placeholder" id="answerPlaceholder">
+                        <i class="fas fa-comment-alt" style="font-size: 2.5rem; margin-bottom: 15px;"></i>
+                        <p>Your answer will appear here after you ask a question.</p>
+                    </div>
+                    
+                    <div class="answer-content" id="answerContent" style="display: none;">
+                        <p id="answerText"></p>
+                        
+                        <div class="answer-references">
+                            <h4>References:</h4>
+                            <div id="referencesList"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>DocuQuery - Intelligent Document Q&A System | Powered by RAG Technology</p>
+        </footer>
+    </div>
+
+    <div class="notification" id="notification"></div>
+    <div class="mode-indicator">
+        <div class="status-indicator"></div>
+        <span>Browser-Only Mode</span>
+    </div>
+
+    <!-- ==================== JAVASCRIPT CODE ==================== -->
+    <script>
+        // ===== VARIABLE DECLARATIONS =====
+        let documents = [];
+        let vectorStore = [];
+
+        // ===== INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEventListeners();
+            loadSampleDocuments();
+            showNotification("Document Q&A System loaded successfully!");
+        });
+
+        // ===== NOTIFICATION SYSTEM =====
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = 'notification' + (isError ? ' error' : '');
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // ===== EVENT HANDLERS =====
+        function initializeEventListeners() {
+            // File input handling
+            document.getElementById('fileInput').addEventListener('change', function(event) {
+                const files = event.target.files;
+                if (files.length > 0) {
+                    handleFiles(files);
+                }
+            });
+            
+            // Drag and drop functionality
+            const dropZone = document.getElementById('dropZone');
+            
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                dropZone.style.backgroundColor = '#e1f0fa';
+                dropZone.style.borderColor = '#2980b9';
+            });
+            
+            dropZone.addEventListener('dragleave', function() {
+                dropZone.style.backgroundColor = '';
+                dropZone.style.borderColor = '#3498db';
+            });
+            
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                dropZone.style.backgroundColor = '';
+                dropZone.style.borderColor = '#3498db';
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFiles(files);
+                }
+            });
+            
+            // Question submission
+            document.getElementById('askButton').addEventListener('click', generateAnswer);
+            
+            // Allow pressing Enter to submit question
+            document.getElementById('questionInput').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    generateAnswer();
+                }
+            });
+        }
+
+        // ===== SAMPLE DOCUMENTS =====
+        function loadSampleDocuments() {
+            const sampleDocuments = [
+                {
+                    name: "Introduction_to_RAG.pdf",
+                    type: "pdf",
+                    content: "Retrieval-Augmented Generation (RAG) combines information retrieval with language models to produce more accurate and contextually relevant answers. RAG systems first retrieve relevant documents or passages from a knowledge source, then use a language model to generate a response based on the retrieved information. This approach reduces hallucinations and allows the model to provide up-to-date information from external sources."
+                },
+                {
+                    name: "AI_Applications.txt",
+                    type: "text",
+                    content: "Artificial Intelligence has numerous applications across various industries. In healthcare, AI is used for disease diagnosis and drug discovery. In finance, it powers fraud detection systems. In education, AI enables personalized learning experiences. The technology continues to evolve, with new applications emerging regularly in fields like autonomous vehicles, natural language processing, and computer vision."
+                }
+            ];
+            
+            sampleDocuments.forEach(doc => {
+                addDocumentToUI(doc);
+                const chunks = chunkDocument(doc);
+                storeDocumentChunks(doc.name, chunks);
+            });
+        }
+
+        // ===== FILE HANDLING =====
+        function handleFiles(files) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                processDocument(file);
+            }
+        }
+
+        function processDocument(file) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                let content = "";
+                
+                if (file.type === 'application/pdf') {
+                    content = "Extracted text from PDF: " + file.name + ". This is a simulation of text extraction from a PDF document. In a real application, this would contain the actual text content of the PDF.";
+                } else if (file.type === 'text/plain') {
+                    content = e.target.result;
+                } else {
+                    content = "Simulated content for " + file.name + ". This file type would be processed differently in a production system.";
+                }
+                
+                const documentData = {
+                    name: file.name,
+                    type: file.type,
+                    content: content,
+                    size: file.size,
+                    uploadedAt: new Date().toISOString()
+                };
+                
+                addDocumentToUI(documentData);
+                const chunks = chunkDocument(documentData);
+                storeDocumentChunks(documentData.name, chunks);
+                saveDocumentToStorage(documentData);
+                
+                showNotification(`File ${file.name} processed successfully!`);
+            };
+            
+            if (file.type === 'text/plain') {
+                reader.readAsText(file);
+            } else {
+                setTimeout(() => {
+                    const documentData = {
+                        name: file.name,
+                        type: file.type,
+                        content: "Simulated content for " + file.name,
+                        size: file.size,
+                        uploadedAt: new Date().toISOString()
+                    };
+                    
+                    addDocumentToUI(documentData);
+                    const chunks = chunkDocument(documentData);
+                    storeDocumentChunks(documentData.name, chunks);
+                    saveDocumentToStorage(documentData);
+                    
+                    showNotification(`File ${file.name} processed successfully!`);
+                }, 1000);
+            }
+        }
+
+        // ===== DOCUMENT UI MANAGEMENT =====
+        function addDocumentToUI(documentData) {
+            const docItem = document.createElement('div');
+            docItem.className = 'document-item';
+            docItem.id = `doc-${encodeURIComponent(documentData.name)}`;
+            docItem.innerHTML = `
+                <div class="document-icon">
+                    <i class="fas fa-file-${getFileIcon(documentData.name)}"></i>
+                </div>
+                <div class="document-name">${documentData.name}</div>
+                <div class="document-actions">
+                    <button class="action-btn" onclick="removeDocument('${encodeURIComponent(documentData.name)}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            document.getElementById('documentsList').appendChild(docItem);
+            
+            documents.push(documentData);
+        }
+
+        function removeDocument(documentName) {
+            const decodedName = decodeURIComponent(documentName);
+            if (confirm(`Are you sure you want to remove ${decodedName}?`)) {
+                const docElement = document.getElementById(`doc-${documentName}`);
+                if (docElement) {
+                    docElement.remove();
+                }
+                
+                removeDocumentFromStorage(decodedName);
+                removeDocumentFromVectorStore(decodedName);
+                documents = documents.filter(doc => doc.name !== decodedName);
+                
+                showNotification(`Document ${decodedName} removed`);
+            }
+        }
+
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            if (ext === 'pdf') return 'pdf';
+            if (['txt', 'md'].includes(ext)) return 'alt';
+            if (['doc', 'docx'].includes(ext)) return 'word';
+            if (['html', 'htm'].includes(ext)) return 'code';
+            return 'file';
+        }
+
+        // ===== DOCUMENT PROCESSING =====
+        function chunkDocument(documentData, chunkSize = 300) {
+            const chunks = [];
+            const content = documentData.content;
+            
+            for (let i = 0; i < content.length; i += chunkSize) {
+                const chunk = content.substring(i, i + chunkSize);
+                chunks.push({
+                    text: chunk,
+                    document: documentData.name,
+                    chunkIndex: chunks.length,
+                    startIndex: i
+                });
+            }
+            
+            return chunks;
+        }
+
+        // ===== VECTOR STORE MANAGEMENT =====
+        function storeDocumentChunks(documentName, chunks) {
+            vectorStore = vectorStore.filter(chunk => chunk.document !== documentName);
+            
+            chunks.forEach(chunk => {
+                vectorStore.push({
+                    ...chunk,
+                    embedding: generateSimulatedEmbedding(chunk.text)
+                });
+            });
+            
+            console.log(`Stored ${chunks.length} chunks for ${documentName}`);
+        }
+
+        function removeDocumentFromVectorStore(documentName) {
+            vectorStore = vectorStore.filter(chunk => chunk.document !== documentName);
+            console.log(`Removed all chunks for ${documentName}`);
+        }
+
+        function generateSimulatedEmbedding(text) {
+            const words = text.toLowerCase().split(/\s+/);
+            const uniqueWords = [...new Set(words)];
+            return uniqueWords.sort();
+        }
+
+        function findSimilarChunks(query, k = 3) {
+            const queryEmbedding = generateSimulatedEmbedding(query);
+            
+            const scoredChunks = vectorStore.map(chunk => {
+                const similarity = calculateSimilarity(queryEmbedding, chunk.embedding);
+                return { ...chunk, similarity };
+            });
+            
+            return scoredChunks.sort((a, b) => b.similarity - a.similarity).slice(0, k);
+        }
+
+        function calculateSimilarity(embedding1, embedding2) {
+            const intersection = embedding1.filter(value => embedding2.includes(value)).length;
+            const union = new Set([...embedding1, ...embedding2]).size;
+            return union > 0 ? intersection / union : 0;
+        }
+
+        // ===== ANSWER GENERATION =====
+        function generateAnswer() {
+            const questionInput = document.getElementById('questionInput');
+            const processingIndicator = document.getElementById('processingIndicator');
+            const answerPlaceholder = document.getElementById('answerPlaceholder');
+            const answerContent = document.getElementById('answerContent');
+            const answerText = document.getElementById('answerText');
+            const referencesList = document.getElementById('referencesList');
+            
+            if (questionInput.value.trim() === '') {
+                showNotification('Please enter a question first.', true);
+                return;
+            }
+            
+            processingIndicator.style.display = 'flex';
+            answerPlaceholder.style.display = 'none';
+            answerContent.style.display = 'none';
+            
+            setTimeout(() => {
+                processingIndicator.style.display = 'none';
+                answerContent.style.display = 'block';
+                
+                const question = questionInput.value;
+                const relevantChunks = findSimilarChunks(question, 3);
+                const answer = generateAnswerFromChunks(question, relevantChunks);
+                
+                answerText.textContent = answer.response;
+                
+                referencesList.innerHTML = '';
+                if (answer.sources && answer.sources.length > 0) {
+                    answer.sources.forEach(source => {
+                        addReference(source.document, `section ${source.chunk + 1}`);
+                    });
+                } else {
+                    referencesList.innerHTML = '<div class="reference-item">No specific references found</div>';
+                }
+                
+                showNotification('Answer generated successfully!');
+            }, 1500);
+        }
+
+        function generateAnswerFromChunks(question, chunks) {
+            const questionLower = question.toLowerCase();
+            let response = "";
+            const sources = [];
+            
+            if (chunks.length > 0) {
+                const combinedContext = chunks.map(chunk => chunk.text).join(' ');
+                
+                if (questionLower.includes('rag') || questionLower.includes('retrieval')) {
+                    response = 'RAG (Retrieval-Augmented Generation) enhances the capabilities of large language models by incorporating information retrieved from external knowledge sources. This allows the model to provide more accurate and up-to-date answers while reducing the likelihood of generating incorrect information.';
+                } else if (questionLower.includes('benefit') || questionLower.includes('advantage')) {
+                    response = 'The main benefits of using RAG for document Q&A include: 1) Access to current information beyond the model\'s training data, 2) Improved accuracy by grounding responses in actual documents, 3) Ability to cite sources for verification, and 4) Reduced "hallucinations" or incorrect information.';
+                } else if (questionLower.includes('ai') || questionLower.includes('artificial')) {
+                    response = 'Artificial Intelligence has numerous applications across various industries. In healthcare, AI is used for disease diagnosis and drug discovery. In finance, it powers fraud detection systems. In education, AI enables personalized learning experiences.';
+                } else {
+                    response = 'Based on the uploaded documents, I found information relevant to your question: ' + combinedContext.substring(0, 200) + '...';
+                }
+                
+                chunks.forEach(chunk => {
+                    sources.push({
+                        document: chunk.document,
+                        chunk: chunk.chunkIndex
+                    });
+                });
+            } else {
+                response = "I couldn't find any relevant information in the documents to answer your question. Please try asking about RAG, AI applications, or upload more documents on different topics.";
+            }
+            
+            return {
+                response: response,
+                sources: sources
+            };
+        }
+
+        function addReference(filename, location) {
+            const refItem = document.createElement('div');
+            refItem.className = 'reference-item';
+            refItem.innerHTML = `<i class="fas fa-file-alt"></i> ${filename} (${location})`;
+            document.getElementById('referencesList').appendChild(refItem);
+        }
+
+        // ===== LOCAL STORAGE MANAGEMENT =====
+        function saveDocumentToStorage(documentData) {
+            let storedDocuments = JSON.parse(localStorage.getItem('documents')) || [];
+            const existingIndex = storedDocuments.findIndex(doc => doc.name === documentData.name);
+            if (existingIndex !== -1) {
+                storedDocuments[existingIndex] = documentData;
+            } else {
+                storedDocuments.push(documentData);
+            }
+            localStorage.setItem('documents', JSON.stringify(storedDocuments));
+        }
+
+        function loadDocumentsFromStorage() {
+            const storedDocuments = JSON.parse(localStorage.getItem('documents')) || [];
+            storedDocuments.forEach(doc => {
+                addDocumentToUI(doc);
+                const chunks = chunkDocument(doc);
+                storeDocumentChunks(doc.name, chunks);
+            });
+        }
+
+        function removeDocumentFromStorage(documentName) {
+            let storedDocuments = JSON.parse(localStorage.getItem('documents')) || [];
+            storedDocuments = storedDocuments.filter(doc => doc.name !== documentName);
+            localStorage.setItem('documents', JSON.stringify(storedDocuments));
+        }
+    </script>
+</body>
+</html>
